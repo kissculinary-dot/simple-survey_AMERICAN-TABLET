@@ -26,7 +26,7 @@ body {
   color: #222;
   letter-spacing: 2px;
   text-transform: uppercase;
-  min-height: 60px; /* Prevent layout jump when blank */
+  min-height: 60px;
 }
 
 .header h1 {
@@ -124,49 +124,56 @@ body {
 <div id="thankYou">Thank you for your feedback!</div>
 
 <script>
-// Replace with your Google Script URL
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx07Y64YQoYUZusgLzcYfjYkpfTc2uRWBe3115DI3-Ddzs0dJR40HDOj9zANw0-1kn4/exec";
 
-function setMealHeader() {
-  const header = document.getElementById("mealHeader");
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzhAtwBV95jyWM2LE5_FgLZxVBdpKpNFmwF0vLjHmpQaOz53qRInWKkF-LdN5Ib_yhr/exec";
+
+function getCurrentMeal() {
   const now = new Date();
-  const hours = now.getHours();
-  const minutes = now.getMinutes();
-  const totalMinutes = hours * 60 + minutes;
+  const totalMinutes = now.getHours() * 60 + now.getMinutes();
 
-  const breakfastStart = 7 * 60;       // 7:00 AM
-  const breakfastEnd = 11 * 60 + 30;   // 11:30 AM
-  const lunchStart = 12 * 60;          // 12:00 PM
-  const lunchEnd = 17 * 60;            // 5:00 PM
-  const dinnerStart = 17 * 60 + 30;    // 5:30 PM
-  const dinnerEnd = 21 * 60;           // 9:00 PM
+  const breakfastStart = 7 * 60;        // 7:00 AM
+  const breakfastEnd = 11 * 60 + 59;    // 11:59 AM
+  const lunchStart = 12 * 60;           // 12:00 PM
+  const lunchEnd = 17 * 60 + 29;        // 5:29 PM
+  const dinnerStart = 17 * 60 + 30;     // 5:30 PM
+  const dinnerEnd = 21 * 60;            // 9:00 PM
 
   if (totalMinutes >= breakfastStart && totalMinutes <= breakfastEnd) {
-    header.textContent = "Breakfast";
+    return "Breakfast";
   } else if (totalMinutes >= lunchStart && totalMinutes <= lunchEnd) {
-    header.textContent = "American Menu";
+    return "American Menu";
   } else if (totalMinutes >= dinnerStart && totalMinutes <= dinnerEnd) {
-    header.textContent = "Dinner";
+    return "Dinner";
   } else {
-    header.textContent = ""; // Blank during off-hours
+    return "";
   }
 }
 
-// Run immediately on load
+function setMealHeader() {
+  const header = document.getElementById("mealHeader");
+  header.textContent = getCurrentMeal();
+}
+
+// Run immediately
 setMealHeader();
 
-// Check every second to switch exactly at the minute
+// Update every second for exact minute switching
 setInterval(setMealHeader, 1000);
 
 document.querySelectorAll(".circle").forEach(button => {
   button.addEventListener("click", function () {
-    const value = this.dataset.value;
+
+    const feedbackValue = this.dataset.value;
+    const mealType = getCurrentMeal();
 
     this.classList.add("selected");
 
     fetch(SCRIPT_URL, {
       method: "POST",
-      body: JSON.stringify({ response: value })
+      body: JSON.stringify({
+        meal: mealType,
+        response: feedbackValue
+      })
     });
 
     const thankYou = document.getElementById("thankYou");
@@ -178,6 +185,7 @@ document.querySelectorAll(".circle").forEach(button => {
     }, 2000);
   });
 });
+
 </script>
 
 </body>
