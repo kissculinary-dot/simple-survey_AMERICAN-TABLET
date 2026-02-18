@@ -26,6 +26,7 @@ body {
   color: #222;
   letter-spacing: 2px;
   text-transform: uppercase;
+  min-height: 60px; /* Prevent layout jump when blank */
 }
 
 .header h1 {
@@ -99,7 +100,7 @@ body {
 <body>
 
 <div class="header">
-  <h2 id="mealHeader">Menu</h2>
+  <h2 id="mealHeader"></h2>
   <h1>How was your meal experience?</h1>
 </div>
 
@@ -126,7 +127,6 @@ body {
 // Replace with your Google Script URL
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx07Y64YQoYUZusgLzcYfjYkpfTc2uRWBe3115DI3-Ddzs0dJR40HDOj9zANw0-1kn4/exec";
 
-// Dynamic header based on time
 function setMealHeader() {
   const header = document.getElementById("mealHeader");
   const now = new Date();
@@ -134,26 +134,29 @@ function setMealHeader() {
   const minutes = now.getMinutes();
   const totalMinutes = hours * 60 + minutes;
 
-  const breakfastStart = 7 * 60 + 30; // 7:30 AM
-  const breakfastEnd = 9 * 60;        // 9:00 AM
-  const americanMenuStart = 12 * 60;  // 12:00 PM
-  const americanMenuEnd = 15 * 60;    // 3:00 PM
-  const dinnerStart = 17 * 60;        // 5:00 PM
-  const dinnerEnd = 19 * 60;          // 7:00 PM
+  const breakfastStart = 7 * 60;       // 7:00 AM
+  const breakfastEnd = 11 * 60 + 30;   // 11:30 AM
+  const lunchStart = 12 * 60;          // 12:00 PM
+  const lunchEnd = 17 * 60;            // 5:00 PM
+  const dinnerStart = 17 * 60 + 30;    // 5:30 PM
+  const dinnerEnd = 21 * 60;           // 9:00 PM
 
   if (totalMinutes >= breakfastStart && totalMinutes <= breakfastEnd) {
-    header.textContent = "Breakfast from 7:30 AM - 9:00 AM";
-  } else if (totalMinutes >= americanMenuStart && totalMinutes <= americanMenuEnd) {
+    header.textContent = "Breakfast";
+  } else if (totalMinutes >= lunchStart && totalMinutes <= lunchEnd) {
     header.textContent = "American Menu";
   } else if (totalMinutes >= dinnerStart && totalMinutes <= dinnerEnd) {
-    header.textContent = "Dinner from 5:00 PM - 7:00 PM";
+    header.textContent = "Dinner";
   } else {
-    header.textContent = "Menu";
+    header.textContent = ""; // Blank during off-hours
   }
 }
 
-// Run on page load
+// Run immediately on load
 setMealHeader();
+
+// Check every second to switch exactly at the minute
+setInterval(setMealHeader, 1000);
 
 document.querySelectorAll(".circle").forEach(button => {
   button.addEventListener("click", function () {
