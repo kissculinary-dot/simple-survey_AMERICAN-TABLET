@@ -35,7 +35,7 @@ body { margin:0; font-family:'Montserrat',Arial,sans-serif; text-align:center; b
 <div id="thankYou">Thank you for your feedback!</div>
 
 <script>
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbx07Y64YQoYUZusgLzcYfjYkpfTc2uRWBe3115DI3-Ddzs0dJR40HDOj9zANw0-1kn4/exec"; // replace with your Apps Script Web App URL
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLovLyr49noqaJCFaRyFyG477lIRP2bvoC50t6s1dl6xvP0bL3jMSMXNVUCsaZr_9L/exec";
 
 function getCurrentMeal() {
   const now = new Date();
@@ -52,21 +52,27 @@ function setMealHeader() {
 }
 
 setMealHeader();
-setInterval(setMealHeader, 1000); // update every second
+setInterval(setMealHeader, 1000);
 
 document.querySelectorAll(".circle").forEach(button => {
   button.addEventListener("click", function () {
     const feedbackValue = this.dataset.value;
     const mealType = getCurrentMeal();
-    if (!mealType) return; // prevent empty meal submissions
+    if (!mealType) return;
 
     this.classList.add("selected");
 
     fetch(SCRIPT_URL, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ meal: mealType, response: feedbackValue })
-    });
+      body: JSON.stringify({
+        meal: mealType,
+        response: feedbackValue
+      })
+    })
+    .then(res => res.json())
+    .then(data => console.log("Success:", data))
+    .catch(err => console.error("Error:", err));
 
     const thankYou = document.getElementById("thankYou");
     thankYou.classList.add("show");
